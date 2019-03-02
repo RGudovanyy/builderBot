@@ -1,12 +1,10 @@
 package net.anviprojects.builderBot
 
 import com.samczsun.skype4j.Skype
-import com.samczsun.skype4j.events.EventHandler
-import com.samczsun.skype4j.events.Listener
-import com.samczsun.skype4j.events.chat.message.MessageEvent
-import com.samczsun.skype4j.events.contact.ContactRequestEvent
 import net.anviprojects.builderBot.helper.LiveLoginHelper
 import net.anviprojects.builderBot.helper.MSFTSkypeClient
+import net.anviprojects.builderBot.listeners.ContactRequestListener
+import net.anviprojects.builderBot.listeners.MessageListener
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -18,8 +16,6 @@ import java.util.logging.Logger
 class BuilderBotApplication {
 
 	/*TODO
-1. вынести листенер в отдельный класс. Возможно даже разделить на несколько по типам событий - MessageEventListener,
-ContactRequestListener и т.д.
 2. сообщения передавать в MessageProcessor. На первом этапе сделать в нем мапу, и пачку подготовленных ответов, которые
 будем пересылать отправителю
  */
@@ -40,22 +36,8 @@ fun main(args: Array<String>) {
 	skype.login()
 	println("Logged in")
 
-	skype.eventDispatcher.registerListener(object: Listener {
-		@EventHandler
-		fun onMessage(e : MessageEvent){
-
-			// для того, чтоб не реагировал на свои же сообщения
-			if (!e.message.sender.username.equals(botApplication.botUsername)) {
-				println("Message: ${e.message.content}")
-				e.chat.sendMessage(e.message.content)
-			}
-		}
-
-		@EventHandler
-		fun onContact(e : ContactRequestEvent) {
-			e.request.sender.authorize()
-		}
-	})
+	skype.eventDispatcher.registerListener(ContactRequestListener())
+	skype.eventDispatcher.registerListener(MessageListener(skype))
 
 	skype.subscribe()
 	println("Subscribed")
@@ -66,7 +48,7 @@ fun main(args: Array<String>) {
 
 }
 
-fun getSkype(s: String, s1: String): Skype {
+private fun getSkype(s: String, s1: String): Skype {
 	val jsonObject = LiveLoginHelper.getXTokenObject(s, s1)
 	val skypeToken = jsonObject.getString("skypetoken")
 	val skypeId = jsonObject.getString("skypeid")
