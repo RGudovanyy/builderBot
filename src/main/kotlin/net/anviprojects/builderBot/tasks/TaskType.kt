@@ -1,5 +1,19 @@
 package net.anviprojects.builderBot.tasks
 
 enum class TaskType {
-    BUILD, DEPLOY, REBOOT
+    BUILD {
+        override fun toString(): String {
+            return "сборку"
+        }
+    },
+    DEPLOY {
+        override fun toString(): String {
+            return "обновление"
+        }
+    },
+    REBOOT {
+        override fun toString(): String {
+            return "перезагрузку"
+        }
+    }
 }

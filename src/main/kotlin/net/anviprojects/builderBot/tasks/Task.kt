@@ -18,4 +18,8 @@ class Task(val target: String, val taskType: TaskType, val user: BotUser) {
         result = 31 * result + user.hashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "Задача на $taskType $target"
+    }
 }

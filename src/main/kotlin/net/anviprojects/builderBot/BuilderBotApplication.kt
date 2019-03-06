@@ -5,6 +5,7 @@ import net.anviprojects.builderBot.helper.LiveLoginHelper
 import net.anviprojects.builderBot.helper.MSFTSkypeClient
 import net.anviprojects.builderBot.listeners.ContactRequestListener
 import net.anviprojects.builderBot.listeners.MessageListener
+import net.anviprojects.builderBot.services.MessageProcessor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -15,16 +16,12 @@ import java.util.logging.Logger
 @PropertySource("classpath:auth.properties")
 class BuilderBotApplication {
 
-	/*TODO
-2. сообщения передавать в MessageProcessor. На первом этапе сделать в нем мапу, и пачку подготовленных ответов, которые
-будем пересылать отправителю
- */
+	//TODO работу с пропертями нужно вынести в отдельный класс конфигурации
 	@Value("\${botname:}")
 	lateinit var botUsername: String
 	@Value("\${botpass:}")
 	lateinit var botPassword: String
 }
-
 
 fun main(args: Array<String>) {
 
@@ -37,7 +34,7 @@ fun main(args: Array<String>) {
 	println("Logged in")
 
 	skype.eventDispatcher.registerListener(ContactRequestListener())
-	skype.eventDispatcher.registerListener(MessageListener(skype))
+	skype.eventDispatcher.registerListener(MessageListener(skype, appContext.getBean(MessageProcessor::class.java)))
 
 	skype.subscribe()
 	println("Subscribed")
