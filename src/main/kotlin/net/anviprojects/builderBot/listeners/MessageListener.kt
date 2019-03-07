@@ -15,6 +15,11 @@ class MessageListener(val skype : Skype, val messageProcessor: MessageProcessor)
 
         // для того, чтоб не реагировал на свои же сообщения
         if (!isMyself(event)) {
+            if (event.message.content.asPlaintext().contains("!shutdown")) {
+                event.chat.sendMessage("Пока-пока")
+                System.exit(0)
+            }
+
             val botUser = BotUser.resolveUser(event.message.sender)
             val tasks = messageProcessor.createTasks(event.message.content, botUser)
             event.chat.sendMessage(echoMessage(tasks))
@@ -23,7 +28,7 @@ class MessageListener(val skype : Skype, val messageProcessor: MessageProcessor)
 
     private fun echoMessage(tasks: List<Task>): String {
         val res = StringBuilder().append("Выполняю: \n")
-        tasks.stream().forEach { res.append(it).append("\n") }
+        tasks.stream().forEach { res.append(it) }
         return res.toString()
     }
 
