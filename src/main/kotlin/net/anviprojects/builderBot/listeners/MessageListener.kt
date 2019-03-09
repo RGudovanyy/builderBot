@@ -1,36 +1,33 @@
 package net.anviprojects.builderBot.listeners
 
-import com.samczsun.skype4j.Skype
 import com.samczsun.skype4j.events.EventHandler
 import com.samczsun.skype4j.events.Listener
 import com.samczsun.skype4j.events.chat.message.MessageEvent
+import com.samczsun.skype4j.user.User
 import net.anviprojects.builderBot.model.BotUser
+import net.anviprojects.builderBot.model.ConversationContext
 import net.anviprojects.builderBot.services.MessageProcessor
-import net.anviprojects.builderBot.tasks.Task
+import net.anviprojects.builderBot.services.MessageService
 
-class MessageListener(val skype : Skype, val messageProcessor: MessageProcessor) : Listener {
+class MessageListener(val username : String, val messageProcessor: MessageProcessor, val messageService: MessageService): Listener {
+
+    val userContexts = HashMap<User, ConversationContext>()
 
     @EventHandler
     fun onMessage(event : MessageEvent){
 
         // для того, чтоб не реагировал на свои же сообщения
         if (!isMyself(event)) {
-            if (event.message.content.asPlaintext().contains("!shutdown")) {
-                event.chat.sendMessage("Пока-пока")
-                System.exit(0)
+            if (userContexts.containsKey(event.message.sender)) {
+                userContexts.get(event.message.sender)!!.addMessageToConversation(event.message)
+            } else {
+                val botUser = BotUser(event.message.sender)
+                val conversationContext = ConversationContext(event.message.sentTime, botUser, messageProcessor, messageService)
+                conversationContext.addMessageToConversation(event.message)
+                userContexts.put(event.message.sender, conversationContext)
             }
-
-            val botUser = BotUser.resolveUser(event.message.sender)
-            val tasks = messageProcessor.createTasks(event.message.content, botUser)
-            event.chat.sendMessage(echoMessage(tasks))
         }
     }
 
-    private fun echoMessage(tasks: List<Task>): String {
-        val res = StringBuilder().append("Выполняю: \n")
-        tasks.stream().forEach { res.append(it) }
-        return res.toString()
-    }
-
-    private fun isMyself(event: MessageEvent) = event.message.sender.username.equals(skype.username)
+    private fun isMyself(event: MessageEvent) = event.message.sender.username.equals(username)
 }

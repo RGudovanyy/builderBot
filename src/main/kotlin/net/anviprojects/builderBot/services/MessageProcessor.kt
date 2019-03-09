@@ -61,4 +61,15 @@ class MessageProcessor {
         }
     }
 
+    fun isYes(message: Message) = message.asPlaintext().toLowerCase().equals("да") || message.asPlaintext().equals("+")
+
+    fun isNo(message: Message) = message.asPlaintext().toLowerCase().equals("нет") || message.asPlaintext().equals("-")
+
+    fun isTaskMessage(content: Message) = buildPurposes.stream().anyMatch { content.asPlaintext().toLowerCase().contains(it) }
+            || deployPurposes.stream().anyMatch { content.asPlaintext().toLowerCase().contains(it) }
+            || rebootPurposes.stream().anyMatch { content.asPlaintext().toLowerCase().contains(it) }
+
+    fun isSystemMessage(content: Message) = content.asPlaintext().startsWith("!")
+
+
 }

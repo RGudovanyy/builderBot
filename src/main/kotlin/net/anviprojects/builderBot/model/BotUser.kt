@@ -6,11 +6,13 @@ import com.samczsun.skype4j.user.User
  * Класс представляюший собой пользователя бота.
  * Содержит в себе как юзернейм из скайпа, так и авторизационные данные для доступа к серверу CI и стендам
  */
-class BotUser {
+class BotUser (private val chatUser: User) {
 
-    companion object {
-        fun resolveUser(chatUser : User) : BotUser {
-            return BotUser()
-        }
+    fun notifyClearContext() {
+        chatUser.chat.sendMessage("Время ожидания ответа истекло")
+
     }
+
+    var delayTimeProperty: Long = 20
+
 }

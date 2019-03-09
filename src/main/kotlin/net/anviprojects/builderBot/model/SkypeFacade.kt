@@ -7,25 +7,27 @@ import net.anviprojects.builderBot.helper.MSFTSkypeClient
 import net.anviprojects.builderBot.listeners.ContactRequestListener
 import net.anviprojects.builderBot.listeners.MessageListener
 import net.anviprojects.builderBot.services.MessageProcessor
+import net.anviprojects.builderBot.services.MessageService
 import org.springframework.stereotype.Component
 import java.util.logging.Logger
 
 @Component
-class SkypeFacade (messageProcessor: MessageProcessor, startupConfiguration: StartupConfiguration) {
+class SkypeFacade (startupConfiguration: StartupConfiguration, messageProcessor : MessageProcessor, messageService: MessageService) {
 
-    lateinit var skype: Skype
+    final val skype: Skype = getSkype(startupConfiguration.botUsername, startupConfiguration.botPassword)
 
     init {
-        skype = getSkype(startupConfiguration.botUsername, startupConfiguration.botPassword)
+       // skype = getSkype(startupConfiguration.botUsername, startupConfiguration.botPassword)
         skype.login()
         println("Logged in")
 
         skype.eventDispatcher.registerListener(ContactRequestListener())
-        skype.eventDispatcher.registerListener(MessageListener(skype, messageProcessor))
+        skype.eventDispatcher.registerListener(MessageListener(skype.username, messageProcessor, messageService))
 
         skype.subscribe()
         println("Subscribed")
     }
+
 
     private fun getSkype(s: String, s1: String): Skype {
         val jsonObject = LiveLoginHelper.getXTokenObject(s, s1)

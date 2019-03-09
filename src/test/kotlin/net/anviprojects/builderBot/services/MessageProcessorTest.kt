@@ -2,17 +2,31 @@ package net.anviprojects.builderBot.services
 
 import com.samczsun.skype4j.formatting.Message
 import com.samczsun.skype4j.formatting.Text
+import com.samczsun.skype4j.user.User
 import net.anviprojects.builderBot.model.BotUser
 import net.anviprojects.builderBot.tasks.Task
 import net.anviprojects.builderBot.tasks.TaskType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations.initMocks
 
 class MessageProcessorTest {
-
-    val user = BotUser()
+    @Mock
+    lateinit var userMock : User
+    @InjectMocks
     val messageProcessor = MessageProcessor()
+
+    lateinit var user : BotUser
+
+    @Before
+    fun setUp() {
+        initMocks(this)
+        user = BotUser(userMock)
+    }
 
     @Test
     fun `make build task`(){
@@ -60,3 +74,4 @@ class MessageProcessorTest {
         assertEquals(resultTasks.get(1), expectedTasks.get(1))
     }
 }
+

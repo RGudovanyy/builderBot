@@ -6,7 +6,7 @@ import org.springframework.context.annotation.PropertySource
 
 @Configuration
 @PropertySource("classpath:auth.properties")
-class StartupConfiguration {
+class StartupConfiguration() {
 
     @Value("\${botname:}")
     lateinit var botUsername: String
