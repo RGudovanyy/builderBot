@@ -6,10 +6,12 @@ import com.samczsun.skype4j.events.chat.message.MessageEvent
 import com.samczsun.skype4j.user.User
 import net.anviprojects.builderBot.model.BotUser
 import net.anviprojects.builderBot.model.ConversationContext
+import net.anviprojects.builderBot.services.CommonMessageService
 import net.anviprojects.builderBot.services.MessageProcessor
-import net.anviprojects.builderBot.services.MessageService
+import net.anviprojects.builderBot.services.SystemMessageService
 
-class MessageListener(val username : String, val messageProcessor: MessageProcessor, val messageService: MessageService): Listener {
+class MessageListener(val username : String, val messageProcessor: MessageProcessor,
+                      val commonMessageService: CommonMessageService, val systemMessageService: SystemMessageService): Listener {
 
     val userContexts = HashMap<User, ConversationContext>()
 
@@ -22,7 +24,8 @@ class MessageListener(val username : String, val messageProcessor: MessageProces
                 userContexts.get(event.message.sender)!!.addMessageToConversation(event.message)
             } else {
                 val botUser = BotUser(event.message.sender)
-                val conversationContext = ConversationContext(event.message.sentTime, botUser, messageProcessor, messageService)
+                val conversationContext = ConversationContext(botUser, messageProcessor,
+                        commonMessageService, systemMessageService)
                 conversationContext.addMessageToConversation(event.message)
                 userContexts.put(event.message.sender, conversationContext)
             }

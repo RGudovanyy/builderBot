@@ -2,12 +2,15 @@ package net.anviprojects.builderBot.model
 
 import com.samczsun.skype4j.chat.Chat
 import com.samczsun.skype4j.chat.messages.ChatMessage
+import net.anviprojects.builderBot.services.CommonMessageService
 import net.anviprojects.builderBot.services.MessageProcessor
-import net.anviprojects.builderBot.services.MessageService
+import net.anviprojects.builderBot.services.SystemMessageService
 import net.anviprojects.builderBot.tasks.Task
 
-class ConversationContext(private var startTime: Long, private var botUser: BotUser,
-                          val messageProcessor: MessageProcessor, val messageService: MessageService) {
+class ConversationContext(private var botUser: BotUser,
+                          val messageProcessor: MessageProcessor,
+                          val commonMessageService: CommonMessageService,
+                          val systemMessageService : SystemMessageService) {
 
     private var tasks = ArrayList<Task>()
     private var messages = ArrayList<ChatMessage>()
@@ -19,7 +22,7 @@ class ConversationContext(private var startTime: Long, private var botUser: BotU
             tasks = ArrayList()
         }
         if (notify) {
-            notifyClearContext(chat)
+            commonMessageService.notifyClearContext(chat)
         }
     }
 
@@ -39,28 +42,13 @@ class ConversationContext(private var startTime: Long, private var botUser: BotU
             val tasksFromMessage = messageProcessor.createTasks(message.content, botUser)
             tasks.addAll(tasksFromMessage)
 
-            askForSubmit(message.chat, tasks)
+            commonMessageService.askForSubmit(message.chat, tasks)
 
         } else if (messageProcessor.isSystemMessage(message.content)) {
-            //TODO not implemented
+            systemMessageService.onMessage(message)
 
         } else {
-            //TODO not implemented
-
+            commonMessageService.sendNotUnderstandMessage(message.chat)
         }
-
     }
-
-    private fun askForSubmit(chat: Chat, tasks: ArrayList<Task>){
-        val res = StringBuilder().append("Выполняю:")
-        tasks.stream().forEach { res.append("\n").append(it) }
-        res.append("\nВсе верно?")
-        chat.sendMessage(res.toString())
-    }
-
-    private fun notifyClearContext(chat: Chat) {
-        chat.sendMessage("Все добавленные задачи отменены")
-    }
-
-
 }
