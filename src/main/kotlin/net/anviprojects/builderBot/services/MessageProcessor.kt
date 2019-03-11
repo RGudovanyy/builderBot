@@ -1,6 +1,5 @@
 package net.anviprojects.builderBot.services
 
-import com.samczsun.skype4j.formatting.Message
 import net.anviprojects.builderBot.model.BotUser
 import net.anviprojects.builderBot.tasks.Task
 import net.anviprojects.builderBot.tasks.TaskType
@@ -26,21 +25,22 @@ import org.springframework.stereotype.Component
 @Component
 class MessageProcessor {
     //TODO планируется получать алиасы целей из БД - нужна возможность пополнять их список пользователем
-    val buildToAliases = mapOf(Pair("main", listOf("main", "мейн")),
-                                Pair("stable", listOf("stable", "стейбл")))
-    val serverToAliases = mapOf(Pair("mainStand", listOf("main", "мейн")),
-            Pair("stableStand", listOf("stable", "стейбл")))
-    val buildPurposes = listOf("сборк", "собер", "собра")
-    val deployPurposes = listOf("обнов", "постав")
-    val rebootPurposes = listOf("ребут", "перезагр")
+    val buildToAliases = mutableMapOf(Pair("main", mutableListOf("main", "мейн")),
+                                Pair("stable", mutableListOf("stable", "стейбл")))
+    val serverToAliases = mutableMapOf(Pair("mainStand", mutableListOf("main", "мейн")),
+            Pair("stableStand", mutableListOf("stable", "стейбл")))
+    val buildPurposes = mutableListOf("сборк", "собер", "собра")
+    val deployPurposes = mutableListOf("обнов", "постав")
+    val rebootPurposes = mutableListOf("ребут", "перезагр")
+    val teamcities = mutableListOf<String>()
+    val weblogics = mutableListOf<String>()
 
-    fun createTasks(message: Message, user: BotUser): List<Task> {
+    fun createTasks(message: String, user: BotUser): List<Task> {
         val tasks = mutableListOf<Task>()
-        val msgContent = message.asPlaintext().toLowerCase()
         // вариант так себе - лишний раз проходим по ненужным спискам
-        _createTasks(msgContent, tasks, user, buildPurposes, buildToAliases, TaskType.BUILD)
-        _createTasks(msgContent, tasks, user, deployPurposes, serverToAliases, TaskType.DEPLOY)
-        _createTasks(msgContent, tasks, user, rebootPurposes, serverToAliases, TaskType.REBOOT)
+        _createTasks(message, tasks, user, buildPurposes, buildToAliases, TaskType.BUILD)
+        _createTasks(message, tasks, user, deployPurposes, serverToAliases, TaskType.DEPLOY)
+        _createTasks(message, tasks, user, rebootPurposes, serverToAliases, TaskType.REBOOT)
         return tasks
     }
 
@@ -61,15 +61,14 @@ class MessageProcessor {
         }
     }
 
-    fun isYes(message: Message) = message.asPlaintext().toLowerCase().equals("да") || message.asPlaintext().equals("+")
+    fun isYes(message: String) = message.equals("да") || message.equals("+")
+    fun isNo(message: String) = message.equals("нет") || message.equals("-")
 
-    fun isNo(message: Message) = message.asPlaintext().toLowerCase().equals("нет") || message.asPlaintext().equals("-")
+    fun isTaskMessage(content: String) = buildPurposes.stream().anyMatch { content.contains(it) }
+            || deployPurposes.stream().anyMatch { content.contains(it) }
+            || rebootPurposes.stream().anyMatch { content.contains(it) }
 
-    fun isTaskMessage(content: Message) = buildPurposes.stream().anyMatch { content.asPlaintext().toLowerCase().contains(it) }
-            || deployPurposes.stream().anyMatch { content.asPlaintext().toLowerCase().contains(it) }
-            || rebootPurposes.stream().anyMatch { content.asPlaintext().toLowerCase().contains(it) }
-
-    fun isSystemMessage(content: Message) = content.asPlaintext().startsWith("!")
-
-
+    fun isSystemMessage(message: String) = message.startsWith("!")
+    fun isGetHelp(message: String): Boolean = message.equals("!help")
+    fun isShutdown(message: String): Boolean = message.equals("!shutdown")
 }

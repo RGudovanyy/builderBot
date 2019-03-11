@@ -29,23 +29,24 @@ class ConversationContext(private var botUser: BotUser,
     fun addMessageToConversation(message: ChatMessage) {
         messages.add(message)
         lastMessageTime = message.sentTime
+        val messageContentLower = message.content.asPlaintext().toLowerCase()
 
-        if (tasks.isNotEmpty() && messageProcessor.isYes(message.content)) {
+        if (tasks.isNotEmpty() && messageProcessor.isYes(messageContentLower)) {
             //sendTasksToMessageService(tasks)
             message.chat.sendMessage("Океюшки")
             clearContext(message.chat, false)
-        } else if (tasks.isNotEmpty() && messageProcessor.isNo(message.content)) {
+        } else if (tasks.isNotEmpty() && messageProcessor.isNo(messageContentLower)) {
             clearContext(message.chat, true)
         }
 
-        if (messageProcessor.isTaskMessage(message.content)) {
-            val tasksFromMessage = messageProcessor.createTasks(message.content, botUser)
+        if (messageProcessor.isTaskMessage(messageContentLower)) {
+            val tasksFromMessage = messageProcessor.createTasks(messageContentLower, botUser)
             tasks.addAll(tasksFromMessage)
 
             commonMessageService.askForSubmit(message.chat, tasks)
 
-        } else if (messageProcessor.isSystemMessage(message.content)) {
-            systemMessageService.onMessage(message)
+        } else if (messageProcessor.isSystemMessage(messageContentLower)) {
+            systemMessageService.onMessage(message, botUser)
 
         } else {
             commonMessageService.sendNotUnderstandMessage(message.chat)
