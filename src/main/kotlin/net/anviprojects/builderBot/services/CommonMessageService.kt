@@ -25,6 +25,11 @@ class CommonMessageService {
     }
 
     fun askForSubmit(chat: Chat, tasks: ArrayList<Task>){
+        if (tasks.isEmpty()) {
+            chat.sendMessage("Не найдено подходящих задач")
+            return
+        }
+
         val res = StringBuilder().append("Выполняю:")
         tasks.stream().forEach { res.append("\n").append(it) }
         res.append("\nВсе верно?")

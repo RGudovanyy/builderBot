@@ -35,11 +35,13 @@ class ConversationContext(private var botUser: BotUser,
             //sendTasksToMessageService(tasks)
             message.chat.sendMessage("Океюшки")
             clearContext(message.chat, false)
+            return
         } else if (tasks.isNotEmpty() && messageProcessor.isNo(messageContentLower)) {
             clearContext(message.chat, true)
+            return
         }
 
-        if (messageProcessor.isTaskMessage(messageContentLower)) {
+        if (messageProcessor.isTaskMessage(messageContentLower) && !messageProcessor.isSystemMessage(messageContentLower)) {
             val tasksFromMessage = messageProcessor.createTasks(messageContentLower, botUser)
             tasks.addAll(tasksFromMessage)
 

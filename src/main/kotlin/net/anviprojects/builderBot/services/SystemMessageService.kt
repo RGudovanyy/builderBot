@@ -70,7 +70,7 @@ class SystemMessageService {
                 "Пример: !add_buildplan UfosBuildPlan http://someteamcityname.otr.ru buildAlias, билд_план, мастер\n\n" +
                 "!add_weblogic [weblogic_address] [alias_1, alias_2 ... alias_N] - добавляет для текущего пользователя новую " +
                 "запись стенда WebLogic, а так же список алиасов которые будут на него ссылаться\n" +
-                "Пример: !add_weblogic http://someweblogicname.otr.ru, стенд, stand, cntyl, ыефтв" +
+                "Пример: !add_weblogic http://someweblogicname.otr.ru, стенд, stand, cntyl, ыефтв\n" +
                 "==========")
     }
 
