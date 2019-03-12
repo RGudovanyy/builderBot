@@ -1,9 +1,13 @@
 package net.anviprojects.builderBot.services
 
 import net.anviprojects.builderBot.model.BotUser
+import net.anviprojects.builderBot.model.BuildPlan
+import net.anviprojects.builderBot.model.Teamcity
+import net.anviprojects.builderBot.model.WebLogic
 import net.anviprojects.builderBot.tasks.Task
 import net.anviprojects.builderBot.tasks.TaskType
 import org.springframework.stereotype.Component
+import kotlin.streams.toList
 
 
 /*
@@ -32,8 +36,9 @@ class MessageProcessor {
     val buildPurposes = mutableListOf("сборк", "собер", "собра")
     val deployPurposes = mutableListOf("обнов", "постав")
     val rebootPurposes = mutableListOf("ребут", "перезагр")
-    val teamcities = mutableListOf<String>()
-    val weblogics = mutableListOf<String>()
+    val teamcities = mutableListOf<Teamcity>()
+    val weblogics = mutableListOf<WebLogic>()
+
 
     fun createTasks(message: String, user: BotUser): List<Task> {
         val tasks = mutableListOf<Task>()
@@ -71,4 +76,40 @@ class MessageProcessor {
     fun isSystemMessage(message: String) = message.startsWith("!")
     fun isGetHelp(message: String): Boolean = message.equals("!help")
     fun isShutdown(message: String): Boolean = message.equals("!shutdown")
+    fun isAddTeamcity(message: String): Boolean = message.startsWith("!add_teamcity")
+    fun isAddBuildPlan(message: String): Boolean = message.startsWith("!add_buildplan")
+    fun isAddWebLogic(message: String): Boolean = message.startsWith("!add_weblogic")
+
+    fun parseTeamcityMessage(message: String, botUser: BotUser): Teamcity? {
+        // TODO сейчас botUser не используется. Нужно делать на него ссылку здесь и далее
+        val msgArray = message.substringAfter("!add_teamcity ").split(" ")
+        if (msgArray.size != 3) {
+            return null // TODO возможно стоит заменить на выброс исключения и тогда возвращаемое значение будет null-safety
+        }
+        return Teamcity(msgArray[0], msgArray[1], msgArray[2])
+    }
+
+    fun parseBuildPlanMessage(message: String, botUser: BotUser): BuildPlan? {
+        val msgArray = message.substringAfter("!add_buildplan ").split(" ")
+        if (msgArray.size < 2) {
+            return null
+        } else if (msgArray.size == 2) {
+            return BuildPlan(msgArray[0], null, emptyList())
+        } else {
+            // TODO получать тимсити из БД по имени
+            return BuildPlan(msgArray[0], null, message.substringAfter(msgArray[1]).split(",").stream().map(String::trim).toList())
+        }
+    }
+
+    fun parseWebLogicMessage(message: String, botUser: BotUser): WebLogic? {
+        val msgArray = message.substringAfter("!add_weblogic ").trim().split(" ")
+        if (msgArray.size < 1) {
+            return null
+        } else if (msgArray.size == 1) {
+            return WebLogic(msgArray[0], emptyList())
+        } else {
+            return WebLogic(msgArray[0], message.substringAfter(msgArray[0]).split(",").stream().map(String::trim).toList())
+        }
+    }
+
 }
