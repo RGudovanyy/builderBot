@@ -75,7 +75,7 @@ class SystemMessageService {
     }
 
     private fun shutDown(botUser: BotUser, chat: MessengerChat) {
-        if (botUser.chatUser.username in supremeCommanders) {
+        if (botUser.username in supremeCommanders) {
             chat.sendMessage("Ну, я пошел")
             System.exit(0)
         } else {
