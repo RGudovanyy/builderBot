@@ -1,13 +1,13 @@
-package net.anviprojects.builderBot.model
+package net.anviprojects.builderBot.skype
 
 import com.samczsun.skype4j.Skype
-import net.anviprojects.builderBot.helper.LiveLoginHelper
-import net.anviprojects.builderBot.helper.MSFTSkypeClient
-import net.anviprojects.builderBot.listeners.ContactRequestListener
-import net.anviprojects.builderBot.listeners.MessageListener
 import net.anviprojects.builderBot.services.CommonMessageService
 import net.anviprojects.builderBot.services.MessageProcessor
 import net.anviprojects.builderBot.services.SystemMessageService
+import net.anviprojects.builderBot.skype.helper.LiveLoginHelper
+import net.anviprojects.builderBot.skype.helper.MSFTSkypeClient
+import net.anviprojects.builderBot.skype.listeners.ContactRequestListener
+import net.anviprojects.builderBot.skype.listeners.MessageListener
 import java.util.logging.Logger
 
 class SkypeFacade (val messageProcessor : MessageProcessor,

@@ -1,4 +1,4 @@
-package net.anviprojects.builderBot.helper;
+package net.anviprojects.builderBot.skype.helper;
 
 import com.squareup.okhttp.*;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -8,7 +8,10 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 /**

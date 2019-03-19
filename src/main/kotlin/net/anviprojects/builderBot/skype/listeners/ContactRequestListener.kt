@@ -1,4 +1,4 @@
-package net.anviprojects.builderBot.listeners
+package net.anviprojects.builderBot.skype.listeners
 
 import com.samczsun.skype4j.events.EventHandler
 import com.samczsun.skype4j.events.Listener

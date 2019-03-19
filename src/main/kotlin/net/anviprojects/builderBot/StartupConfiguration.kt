@@ -1,9 +1,9 @@
 package net.anviprojects.builderBot
 
-import net.anviprojects.builderBot.model.SkypeFacade
 import net.anviprojects.builderBot.services.CommonMessageService
 import net.anviprojects.builderBot.services.MessageProcessor
 import net.anviprojects.builderBot.services.SystemMessageService
+import net.anviprojects.builderBot.skype.SkypeFacade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration

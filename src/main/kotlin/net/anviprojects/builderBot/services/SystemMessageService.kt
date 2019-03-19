@@ -1,8 +1,8 @@
 package net.anviprojects.builderBot.services
 
-import com.samczsun.skype4j.chat.Chat
-import com.samczsun.skype4j.chat.messages.ChatMessage
 import net.anviprojects.builderBot.model.BotUser
+import net.anviprojects.builderBot.model.Message
+import net.anviprojects.builderBot.model.MessengerChat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -17,9 +17,9 @@ class SystemMessageService {
     @Autowired
     lateinit var messageProcessor: MessageProcessor
 
-    fun onMessage(message: ChatMessage, botUser: BotUser) {
+    fun onMessage(message: Message, botUser: BotUser) {
 
-        val rawMessage = message.content.asPlaintext()
+        val rawMessage = message.content
 
         when {
             messageProcessor.isAddTeamcity(rawMessage) -> addTeamcity(rawMessage, botUser, message.chat)
@@ -31,7 +31,7 @@ class SystemMessageService {
         }
     }
 
-    private fun addWebLogic(message: String, botUser: BotUser, chat: Chat) {
+    private fun addWebLogic(message: String, botUser: BotUser, chat: MessengerChat) {
         val weblogic = messageProcessor.parseWebLogicMessage(message, botUser)
         if (null == weblogic) {
             chat.sendMessage("Не удалось добавить или обновить запись о стенде - проверьте передаваемые данные")
@@ -40,7 +40,7 @@ class SystemMessageService {
         chat.sendMessage("Добавлена новая запись стенда:\n$weblogic")
     }
 
-    private fun addBuildPlan(message: String, botUser: BotUser, chat: Chat) {
+    private fun addBuildPlan(message: String, botUser: BotUser, chat: MessengerChat) {
         val buildPlan = messageProcessor.parseBuildPlanMessage(message, botUser)
         if (null == buildPlan) {
             chat.sendMessage("Не удалось добавить или обновить запись о билд плане - проверьте передаваемые данные")
@@ -49,7 +49,7 @@ class SystemMessageService {
         chat.sendMessage("Добавлен новый билд план:\n$buildPlan")
     }
 
-    private fun addTeamcity(message: String, botUser: BotUser, chat: Chat) {
+    private fun addTeamcity(message: String, botUser: BotUser, chat: MessengerChat) {
         val teamcity = messageProcessor.parseTeamcityMessage(message, botUser)
         if (null == teamcity) {
             chat.sendMessage("Не удалось добавить или обновить запись о сборочном сервере - проверьте передаваемые данные")
@@ -58,7 +58,7 @@ class SystemMessageService {
         chat.sendMessage("Добавлена новая запись о сборочном сервере:\n$teamcity")
     }
 
-    private fun printHelp(chat: Chat) {
+    private fun printHelp(chat: MessengerChat) {
 
         chat.sendMessage("===== Помощь =====\n" +
                 "!add_teamcity [teamcity_address] [teamcity_login] [teamcity_password] - добавляет для текущего " +
@@ -74,7 +74,7 @@ class SystemMessageService {
                 "==========")
     }
 
-    private fun shutDown(botUser: BotUser, chat: Chat) {
+    private fun shutDown(botUser: BotUser, chat: MessengerChat) {
         if (botUser.chatUser.username in supremeCommanders) {
             chat.sendMessage("Ну, я пошел")
             System.exit(0)

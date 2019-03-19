@@ -1,6 +1,6 @@
 package net.anviprojects.builderBot.services
 
-import com.samczsun.skype4j.chat.Chat
+import net.anviprojects.builderBot.model.MessengerChat
 import net.anviprojects.builderBot.tasks.Task
 import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,11 +20,11 @@ class CommonMessageService {
     lateinit var amqpTemplate : AmqpTemplate
 
 
-    fun sendNotUnderstandMessage(chat: Chat) {
+    fun sendNotUnderstandMessage(chat: MessengerChat) {
         chat.sendMessage("Не удалось распознать запрос")
     }
 
-    fun askForSubmit(chat: Chat, tasks: ArrayList<Task>){
+    fun askForSubmit(chat: MessengerChat, tasks: ArrayList<Task>){
         if (tasks.isEmpty()) {
             chat.sendMessage("Не найдено подходящих задач")
             return
@@ -36,7 +36,7 @@ class CommonMessageService {
         chat.sendMessage(res.toString())
     }
 
-    fun notifyClearContext(chat: Chat) {
+    fun notifyClearContext(chat: MessengerChat) {
         chat.sendMessage("Все добавленные задачи отменены")
     }
 

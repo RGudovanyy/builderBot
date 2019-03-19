@@ -1,4 +1,4 @@
-package net.anviprojects.builderBot.helper;
+package net.anviprojects.builderBot.skype.helper;
 
 import com.samczsun.skype4j.Skype;
 import com.samczsun.skype4j.exceptions.ConnectionException;

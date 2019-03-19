@@ -1,7 +1,5 @@
 package net.anviprojects.builderBot.model
 
-import com.samczsun.skype4j.chat.Chat
-import com.samczsun.skype4j.chat.messages.ChatMessage
 import net.anviprojects.builderBot.services.CommonMessageService
 import net.anviprojects.builderBot.services.MessageProcessor
 import net.anviprojects.builderBot.services.SystemMessageService
@@ -13,11 +11,11 @@ class ConversationContext(private var botUser: BotUser,
                           val systemMessageService : SystemMessageService) {
 
     private var tasks = ArrayList<Task>()
-    private var messages = ArrayList<ChatMessage>()
+    private var messages = ArrayList<Message>()
     private var lastMessageTime = 0L
     private var delayTime = 0L  //
 
-    private fun clearContext(chat : Chat, notify : Boolean) {
+    private fun clearContext(chat : MessengerChat, notify : Boolean) {
         if (tasks.isNotEmpty()) {
             tasks = ArrayList()
         }
@@ -26,10 +24,10 @@ class ConversationContext(private var botUser: BotUser,
         }
     }
 
-    fun addMessageToConversation(message: ChatMessage) {
+    fun addMessageToConversation(message: Message) {
         messages.add(message)
         lastMessageTime = message.sentTime
-        val messageContentLower = message.content.asPlaintext().toLowerCase()
+        val messageContentLower = message.content.toLowerCase()
 
         if (tasks.isNotEmpty() && messageProcessor.isYes(messageContentLower)) {
             //sendTasksToMessageService(tasks)
