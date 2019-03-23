@@ -32,7 +32,7 @@ class PlaceholderRepository {
         return teamcity
     }
 
-    fun saveOrUpdateWeblogic(webLogic: WebLogic) : WebLogic{
+    fun saveOrUpdateWeblogic(webLogic: WebLogic) : WebLogic {
         val weblogicOpt = weblogics.stream().filter { it.weblogicAddress.equals(webLogic.weblogicAddress) }.findFirst()
         if (weblogicOpt.isPresent) {
             weblogics.add(weblogics.indexOf(weblogicOpt.get()), webLogic)

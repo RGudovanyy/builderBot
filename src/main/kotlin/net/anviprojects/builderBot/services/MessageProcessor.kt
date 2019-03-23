@@ -5,6 +5,7 @@ import net.anviprojects.builderBot.model.BuildPlan
 import net.anviprojects.builderBot.model.Teamcity
 import net.anviprojects.builderBot.model.WebLogic
 import net.anviprojects.builderBot.repositories.PlaceholderRepository
+import net.anviprojects.builderBot.repositories.TeamcityRepository
 import net.anviprojects.builderBot.tasks.Task
 import net.anviprojects.builderBot.tasks.TaskType
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,6 +34,8 @@ class MessageProcessor {
 
     @Autowired
     lateinit var placeholderRepository : PlaceholderRepository
+    @Autowired
+    lateinit var teamcityRepository: TeamcityRepository
 
     var buildPurposes = listOf("сборка", "build", "собери", "собрать")
 
@@ -91,19 +94,25 @@ class MessageProcessor {
         if (msgArray.size != 3) {
             return null // TODO возможно стоит заменить на выброс исключения и тогда возвращаемое значение будет null-safety
         }
-        return placeholderRepository.saveOrUpdateTeamcity(Teamcity(msgArray[0], msgArray[1], msgArray[2]))
+        botUser.teamcityLogin = msgArray[1]
+        botUser.teamcityPassword = msgArray[2]
+        return placeholderRepository.saveOrUpdateTeamcity(Teamcity(msgArray[0]))
     }
 
     fun parseBuildPlanMessage(message: String, botUser: BotUser): BuildPlan? {
         val msgArray = message.substringAfter("!add_buildplan ").split(" ")
         if (msgArray.size < 2) {
             return null
-        } else if (msgArray.size == 2) {
-            return placeholderRepository.saveOrUpdateBuild(BuildPlan(msgArray[0], null, emptyList()))
+        }
+        val teamcity = teamcityRepository.findByBuildPlans_Name(msgArray[0])
+        if (teamcity == null) return null
+
+        if (msgArray.size == 2) {
+            return placeholderRepository.saveOrUpdateBuild(BuildPlan(msgArray[0], teamcity, emptyList()))
         } else {
             // TODO получать тимсити из БД по имени
             return placeholderRepository.saveOrUpdateBuild(
-                    BuildPlan(msgArray[0], null,
+                    BuildPlan(msgArray[0], teamcity,
                             message.substringAfter(msgArray[1]).split(",").stream().map(String::trim).toList()))
         }
     }
@@ -120,5 +129,7 @@ class MessageProcessor {
                             message.substringAfter(msgArray[0]).split(",").stream().map(String::trim).toList()))
         }
     }
+
+    fun isStart(message: String) = message.startsWith("!start")
 
 }

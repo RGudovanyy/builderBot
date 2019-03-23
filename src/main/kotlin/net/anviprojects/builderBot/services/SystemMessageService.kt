@@ -28,7 +28,12 @@ class SystemMessageService {
 
             messageProcessor.isGetHelp(rawMessage) -> printHelp(message.chat)
             messageProcessor.isShutdown(rawMessage) -> shutDown(botUser, message.chat)
+            messageProcessor.isStart(rawMessage) -> printStart(message.chat)
         }
+    }
+
+    private fun printStart(chat: MessengerChat) {
+        chat.sendMessage("Привет!")
     }
 
     private fun addWebLogic(message: String, botUser: BotUser, chat: MessengerChat) {

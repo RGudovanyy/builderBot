@@ -21,9 +21,20 @@ import java.net.PasswordAuthentication
 class StartupConfiguration() {
 
     @Value("\${botname:}")
-    lateinit var botUsername: String
+    lateinit var SKYPE_BOT_USERNAME: String
     @Value("\${botpass:}")
-    lateinit var botPassword: String
+    lateinit var SKYPE_BOT_PASSWORD: String
+    @Value("\${proxyuser:}")
+    lateinit var TG_PROXY_USERNAME: String
+    @Value("\${proxypass:}")
+    lateinit var TG_PROXY_PASSWORD: String
+    @Value("\${proxyhost:}")
+    lateinit var TG_PROXY_HOST: String
+    @Value("\${proxyport:}")
+    lateinit var TG_PROXY_PORT: String
+    @Value("\${bottoken:}")
+    lateinit var TG_BOT_TOKEN: String
+
 
     @Autowired
     lateinit var messageProcessor : MessageProcessor
@@ -39,7 +50,29 @@ class StartupConfiguration() {
 
     fun initConnections() {
         skypeFacade = SkypeFacade(messageProcessor, commonMessageService, systemMessageService)
-        skypeFacade.connect(botUsername, botPassword)
+        skypeFacade.connect(SKYPE_BOT_USERNAME, SKYPE_BOT_PASSWORD)
+
+        if (TG_PROXY_USERNAME.isNotEmpty() && TG_PROXY_PASSWORD.isNotEmpty()) {
+            Authenticator.setDefault(object : Authenticator(){
+                override fun getPasswordAuthentication(): PasswordAuthentication {
+                    return PasswordAuthentication(TG_PROXY_USERNAME, TG_PROXY_PASSWORD.toCharArray())
+                }
+            })
+        }
+        ApiContextInitializer.init()
+        val botOptions = getProxyOptions()
+        telegramFacade = TelegramFacade(TG_BOT_TOKEN, botOptions,  messageProcessor, commonMessageService, systemMessageService)
+
+        val telegramBotsApi = TelegramBotsApi()
+        telegramBotsApi.registerBot(telegramFacade)
+
     }
 
+    private fun getProxyOptions(): DefaultBotOptions {
+        val botOptions = ApiContext.getInstance(DefaultBotOptions::class.java)
+        botOptions.proxyHost = TG_PROXY_HOST
+        botOptions.proxyPort = TG_PROXY_PORT.toInt()
+        botOptions.proxyType = DefaultBotOptions.ProxyType.SOCKS5
+        return botOptions
+    }
 }
