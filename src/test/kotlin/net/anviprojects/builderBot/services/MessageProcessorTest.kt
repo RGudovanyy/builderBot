@@ -1,55 +1,40 @@
 package net.anviprojects.builderBot.services
 
-import com.samczsun.skype4j.user.User
 import net.anviprojects.builderBot.model.BotUser
 import net.anviprojects.builderBot.model.BuildPlan
+import net.anviprojects.builderBot.model.Teamcity
 import net.anviprojects.builderBot.model.WebLogic
 import net.anviprojects.builderBot.tasks.Task
 import net.anviprojects.builderBot.tasks.TaskType
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations.initMocks
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@RunWith(SpringRunner::class)
+@ExtendWith(SpringExtension::class)
 @SpringBootTest
-class MessageProcessorTest {
-    @Mock
-    lateinit var userMock : User
+class MessageProcessorTest(@Autowired val messageProcessor : MessageProcessor) {
 
-    @Autowired
-    lateinit var messageProcessor : MessageProcessor
-
-    /*@InjectMocks
-    val messageProcessor = MessageProcessor(startupConfiguration)
-*/
     lateinit var user : BotUser
+    lateinit var teamcity : Teamcity
 
-
-    @Before
+    @BeforeAll
     fun setUp() {
-        initMocks(this)
-        user = BotUser(userMock)
+        user = BotUser("userMock")
+        teamcity = Teamcity("http://someaddress.otr.ru")
 
-        /*Mockito.`when`(startupConfiguration.buildPurposesParam).thenReturn("сборка, build, собери, собрать")
-        Mockito.`when`(startupConfiguration.deployPurposesParam).thenReturn("обновление, обнови, поставка")
-        Mockito.`when`(startupConfiguration.rebootPurposesParam).thenReturn("ребутни, ребут, перезагрузка")*/
-
-
-        messageProcessor.placeholderRepository.builds.add(BuildPlan("main", null, listOf("мейн")))
-        messageProcessor.placeholderRepository.builds.add(BuildPlan("stable", null, listOf("стейбл")))
-        messageProcessor.placeholderRepository.weblogics.add(WebLogic("mainStand", listOf("мейн")))
-        messageProcessor.placeholderRepository.weblogics.add(WebLogic("stableStand", listOf("стейбл")))
+        messageProcessor.placeholderRepository.builds.add(BuildPlan("main", teamcity, listOf("мейн")))
+        messageProcessor.placeholderRepository.builds.add(BuildPlan("stable", teamcity, listOf("стейбл")))
+        messageProcessor.placeholderRepository.weblogics.add(WebLogic("mainStand", "username", "password", mutableListOf("мейн")))
+        messageProcessor.placeholderRepository.weblogics.add(WebLogic("stableStand", "username", "password", mutableListOf("стейбл")))
     }
 
     @Test
-    fun `make two build tasks with and separator`() {
+    fun `make two build tasks with 'and' separator`() {
         val resultTasks = listOf(Task("main", TaskType.BUILD, user), Task("stable", TaskType.BUILD, user))
         val expectedTasks = messageProcessor.createTasks("Сборка мейн и стейбл", user)
         assertTrue(expectedTasks.size == 2)

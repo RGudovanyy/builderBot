@@ -53,9 +53,9 @@ class Teamcity(val teamcityAddress : String) : AbstractModel<Long>() {
 }
 
 @Entity
-class WebLogic(val weblogicAddress : String,
+class WebLogic(val weblogicAddress : String, val username : String, val password : String,
                @ElementCollection
-                val aliases : List<String>) : AbstractModel<Long>() {
+               var aliases : MutableList<String>) : AbstractModel<Long>() {
 
     override fun equals(other: Any?): Boolean {
         if (!super.equals(other)) return false

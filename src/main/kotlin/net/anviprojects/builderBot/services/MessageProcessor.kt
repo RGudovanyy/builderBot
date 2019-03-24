@@ -119,14 +119,14 @@ class MessageProcessor {
 
     fun parseWebLogicMessage(message: String, botUser: BotUser): WebLogic? {
         val msgArray = message.substringAfter("!add_weblogic ").trim().split(" ")
-        if (msgArray.isEmpty()) {
+        if (msgArray.size < 3) {
             return null
-        } else if (msgArray.size == 1) {
-            return placeholderRepository.saveOrUpdateWeblogic(WebLogic(msgArray[0], emptyList()))
+        } else if (msgArray.size == 3) {
+            return placeholderRepository.saveOrUpdateWeblogic(WebLogic(msgArray[0], msgArray[1], msgArray[2], mutableListOf<String>()))
         } else {
-            return placeholderRepository.saveOrUpdateWeblogic(
-                    WebLogic(msgArray[0],
-                            message.substringAfter(msgArray[0]).split(",").stream().map(String::trim).toList()))
+            val webLogic = WebLogic(msgArray[0], msgArray[1], msgArray[2],
+                    message.substringAfter(msgArray[2]).split(",").stream().map(String::trim).toList() as MutableList<String>)
+            return placeholderRepository.saveOrUpdateWeblogic(webLogic)
         }
     }
 
