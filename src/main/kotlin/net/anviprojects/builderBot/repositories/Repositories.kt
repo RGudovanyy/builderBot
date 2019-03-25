@@ -20,6 +20,9 @@ interface BuildRepository : JpaRepository<BuildPlan, Long> {
     fun findByName(name: String) : BuildPlan?
 
     fun findAllByTeamcity_TeamcityAddress(teamcityAddress: String) : List<BuildPlan?>
+
+    @Query("select w from BuildPlan w where w.deployAlias is not null")
+    fun findAllDeployBuildPlans() : List<BuildPlan?>
 }
 
 interface WeblogicRepository : JpaRepository<WebLogic, Long> {

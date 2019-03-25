@@ -9,6 +9,8 @@ class BuildPlan (val name: String,
                  @ElementCollection
                  val aliases: List<String>) : AbstractModel<Long>() {
 
+    var deployAlias : String? = null
+
     override fun equals(other: Any?): Boolean {
         if (!super.equals(other)) return false
 
@@ -25,6 +27,7 @@ class BuildPlan (val name: String,
         var result = name.hashCode()
         result = 31 * result + teamcity.hashCode()
         result = 31 * result + aliases.hashCode()
+        result = 31 * result + deployAlias.hashCode()
         return result
     }
 }

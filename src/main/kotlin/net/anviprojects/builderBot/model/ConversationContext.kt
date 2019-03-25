@@ -3,14 +3,14 @@ package net.anviprojects.builderBot.model
 import net.anviprojects.builderBot.services.CommonMessageService
 import net.anviprojects.builderBot.services.MessageProcessor
 import net.anviprojects.builderBot.services.SystemMessageService
-import net.anviprojects.builderBot.tasks.Task
+import net.anviprojects.builderBot.tasks.AbstractTask
 
 class ConversationContext(private var botUser: BotUser,
                           val messageProcessor: MessageProcessor,
                           val commonMessageService: CommonMessageService,
                           val systemMessageService : SystemMessageService) {
 
-    private var tasks = ArrayList<Task>()
+    private var tasks = ArrayList<AbstractTask>()
     private var messages = ArrayList<Message>()
     private var lastMessageTime = 0L
     private var delayTime = 0L  //
@@ -39,8 +39,9 @@ class ConversationContext(private var botUser: BotUser,
             return
         }
 
-        if (messageProcessor.isTaskMessage(messageContentLower) && !messageProcessor.isSystemMessage(messageContentLower)) {
-            val tasksFromMessage = messageProcessor.createTasks(messageContentLower, botUser)
+        val taskType = messageProcessor.identifyTaskType(messageContentLower)
+        if (taskType != null && !messageProcessor.isSystemMessage(messageContentLower)) {
+            val tasksFromMessage = messageProcessor.createTasks(messageContentLower, botUser, taskType)
             tasks.addAll(tasksFromMessage)
 
             commonMessageService.askForSubmit(message.chat, tasks)

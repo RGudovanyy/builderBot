@@ -86,6 +86,17 @@ class RepositoryTests (@Autowired val teamcityRepository : TeamcityRepository,
     }
 
     @Test
+    fun `buildplan get deploy test`() {
+        val teamcity = teamcityRepository.save(Teamcity("http://someteamcityname.otr.ru"))
+        val buildPlan = BuildPlan("main", teamcity, listOf("main", "мейн"))
+        buildPlan.deployAlias = "мейн"
+        buildRepository.save(buildPlan)
+
+        val result = buildRepository.findAllDeployBuildPlans()
+        assert(result.size == 1)
+    }
+
+    @Test
     fun `weblogic persistence test`() {
         val weblogic = WebLogic("http://weblogic1.otr.ru", "username", "hidden", mutableListOf("stand"));
         weblogicRepository.save(weblogic)
