@@ -4,15 +4,13 @@ package net.anviprojects.builderBot.telegram
 import net.anviprojects.builderBot.model.BotUser
 import net.anviprojects.builderBot.model.ConversationContext
 import net.anviprojects.builderBot.model.MessageAdapter
-import net.anviprojects.builderBot.services.CommonMessageService
-import net.anviprojects.builderBot.services.MessageProcessor
-import net.anviprojects.builderBot.services.SystemMessageService
+import net.anviprojects.builderBot.services.ServiceHolder
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.objects.Update
 
-class TelegramFacade(val token : String, botOptions : DefaultBotOptions, val messageProcessor : MessageProcessor,
-                     val commonMessageService: CommonMessageService, val systemMessageService: SystemMessageService) : TelegramLongPollingBot(botOptions) {
+class TelegramFacade(val token : String, botOptions : DefaultBotOptions,
+                     val serviceHolder: ServiceHolder) : TelegramLongPollingBot(botOptions) {
 
 
     val userContexts = HashMap<String, ConversationContext>()
@@ -28,7 +26,7 @@ class TelegramFacade(val token : String, botOptions : DefaultBotOptions, val mes
         if (userContexts.containsKey(botUser.username)) {
             conversationContext = userContexts.get(botUser.username)!!
         } else {
-            conversationContext = ConversationContext(botUser, messageProcessor, commonMessageService, systemMessageService)
+            conversationContext = ConversationContext(botUser, serviceHolder)
             userContexts.put(botUser.username, conversationContext)
         }
         conversationContext.addMessageToConversation(MessageAdapter.adapt(update.message, TelegramChat(update.message.chatId.toString(), this)))

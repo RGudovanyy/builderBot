@@ -1,17 +1,14 @@
 package net.anviprojects.builderBot.skype
 
 import com.samczsun.skype4j.Skype
-import net.anviprojects.builderBot.services.CommonMessageService
-import net.anviprojects.builderBot.services.MessageProcessor
-import net.anviprojects.builderBot.services.SystemMessageService
+import net.anviprojects.builderBot.services.ServiceHolder
 import net.anviprojects.builderBot.skype.helper.LiveLoginHelper
 import net.anviprojects.builderBot.skype.helper.MSFTSkypeClient
 import net.anviprojects.builderBot.skype.listeners.ContactRequestListener
 import net.anviprojects.builderBot.skype.listeners.MessageListener
 import java.util.logging.Logger
 
-class SkypeFacade (val messageProcessor : MessageProcessor,
-                   val commonMessageService: CommonMessageService, val systemMessageService: SystemMessageService) {
+class SkypeFacade (val serviceHolder: ServiceHolder) {
 
     lateinit var skype : Skype
 
@@ -22,7 +19,7 @@ class SkypeFacade (val messageProcessor : MessageProcessor,
             println("Logged in")
 
             skype.eventDispatcher.registerListener(ContactRequestListener())
-            skype.eventDispatcher.registerListener(MessageListener(skype.username, messageProcessor, commonMessageService, systemMessageService))
+            skype.eventDispatcher.registerListener(MessageListener(skype.username, serviceHolder))
 
             skype.subscribe()
             println("Subscribed")

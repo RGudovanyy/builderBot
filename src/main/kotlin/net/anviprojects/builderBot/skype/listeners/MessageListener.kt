@@ -6,12 +6,9 @@ import com.samczsun.skype4j.events.chat.message.MessageEvent
 import net.anviprojects.builderBot.model.BotUser
 import net.anviprojects.builderBot.model.ConversationContext
 import net.anviprojects.builderBot.model.MessageAdapter
-import net.anviprojects.builderBot.services.CommonMessageService
-import net.anviprojects.builderBot.services.MessageProcessor
-import net.anviprojects.builderBot.services.SystemMessageService
+import net.anviprojects.builderBot.services.ServiceHolder
 
-class MessageListener(val username : String, val messageProcessor: MessageProcessor,
-                      val commonMessageService: CommonMessageService, val systemMessageService: SystemMessageService): Listener {
+class MessageListener(val username : String, val serviceHolder: ServiceHolder): Listener {
 
     val userContexts = HashMap<String, ConversationContext>()
 
@@ -25,8 +22,7 @@ class MessageListener(val username : String, val messageProcessor: MessageProces
                 userContexts.get(event.message.sender.username)!!.addMessageToConversation(message)
             } else {
                 val botUser = BotUser(event.message.sender.username) // TODO сначала пробуем получить пользака из БД, и потом уже создаем
-                val conversationContext = ConversationContext(botUser, messageProcessor,
-                        commonMessageService, systemMessageService)
+                val conversationContext = ConversationContext(botUser, serviceHolder)
                 conversationContext.addMessageToConversation(message)
                 userContexts.put(botUser.username, conversationContext)
             }

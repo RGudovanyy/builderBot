@@ -2,23 +2,11 @@ package net.anviprojects.builderBot.services
 
 import net.anviprojects.builderBot.model.MessengerChat
 import net.anviprojects.builderBot.tasks.AbstractTask
-import org.springframework.amqp.core.AmqpTemplate
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-/*
- * Сервис для формирования задачи (AbstractTask) или списка задач (задачи выстраиваются в строгий порядок, ожидается ответ после
- * выполнения всех) и передачи ее в очередь RabbitMQ.
- * За парсинг сообщения в задачу отвечает MessageProcessor. Цепь событий:
- * MessageListener -(Message)-> MessageProcessor -(AbstractTask)-> CommonMessageService -(AbstractTask)-> AmqpTemplate
- */
 
 @Service
 class CommonMessageService {
-
-    @Autowired
-    lateinit var amqpTemplate : AmqpTemplate
-
 
     fun sendNotUnderstandMessage(chat: MessengerChat) {
         chat.sendMessage("Не удалось распознать запрос")
@@ -39,8 +27,4 @@ class CommonMessageService {
     fun notifyClearContext(chat: MessengerChat) {
         chat.sendMessage("Все добавленные задачи отменены")
     }
-
-
-
-
 }
