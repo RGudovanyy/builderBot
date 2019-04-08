@@ -7,6 +7,7 @@ import net.anviprojects.builderBot.model.MessageAdapter
 import net.anviprojects.builderBot.services.ServiceHolder
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 
 class TelegramFacade(val token : String, botOptions : DefaultBotOptions,
@@ -29,7 +30,8 @@ class TelegramFacade(val token : String, botOptions : DefaultBotOptions,
             conversationContext = ConversationContext(botUser, serviceHolder)
             userContexts.put(botUser.username, conversationContext)
         }
-        conversationContext.addMessageToConversation(MessageAdapter.adapt(update.message, TelegramChat(update.message.chatId.toString(), this)))
+        val message = conversationContext.addMessageToConversationAndReply(MessageAdapter.adapt(update.message))
+        execute(SendMessage().setChatId(update.message.chatId.toString()).setText(message))
     }
 
 

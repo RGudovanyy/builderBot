@@ -1,5 +1,6 @@
 package net.anviprojects.builderBot.services
 
+import com.microsoft.bot.schema.models.ResourceResponse
 import net.anviprojects.builderBot.model.MessengerChat
 import net.anviprojects.builderBot.tasks.AbstractTask
 import org.springframework.stereotype.Service
@@ -8,23 +9,18 @@ import org.springframework.stereotype.Service
 @Service
 class CommonMessageService {
 
-    fun sendNotUnderstandMessage(chat: MessengerChat) {
-        chat.sendMessage("Не удалось распознать запрос")
-    }
+    fun sendNotUnderstandMessage() = "Не удалось распознать запрос"
 
-    fun askForSubmit(chat: MessengerChat, abstractTasks: ArrayList<AbstractTask>){
+    fun askForSubmit(abstractTasks: ArrayList<AbstractTask>) : String {
         if (abstractTasks.isEmpty()) {
-            chat.sendMessage("Не найдено подходящих задач")
-            return
+            return "Не найдено подходящих задач"
         }
 
         val res = StringBuilder().append("Выполняю:")
-        abstractTasks.stream().forEach { res.append("\n").append(it) }
+        abstractTasks.forEach { res.append("\n").append(it) }
         res.append("\nВсе верно?")
-        chat.sendMessage(res.toString())
+        return res.toString()
     }
 
-    fun notifyClearContext(chat: MessengerChat) {
-        chat.sendMessage("Все добавленные задачи отменены")
-    }
+    fun notifyClearContext() = "Все добавленные задачи отменены"
 }

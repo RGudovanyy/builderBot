@@ -1,9 +1,10 @@
 package net.anviprojects.builderBot
 
 import net.anviprojects.builderBot.services.ServiceHolder
-import net.anviprojects.builderBot.skype.SkypeFacade
+import net.anviprojects.builderBot.skype.SkypeAuthenticator
 import net.anviprojects.builderBot.telegram.TelegramFacade
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.PropertySource
 import org.telegram.telegrambots.ApiContextInitializer
@@ -32,15 +33,12 @@ class StartupConfiguration(val serviceHolder: ServiceHolder) {
     @Value("\${bottoken:}")
     lateinit var TG_BOT_TOKEN: String
 
-    lateinit var skypeFacade: SkypeFacade
     lateinit var telegramFacade : TelegramFacade
 
-
+    @Bean(name = arrayOf("authenticator"))
+    fun getAuthenticator() = SkypeAuthenticator(SKYPE_BOT_USERNAME, SKYPE_BOT_PASSWORD)
 
     fun initConnections() {
-        skypeFacade = SkypeFacade(serviceHolder)
-        skypeFacade.connect(SKYPE_BOT_USERNAME, SKYPE_BOT_PASSWORD)
-
         if (TG_PROXY_USERNAME.isNotEmpty() && TG_PROXY_PASSWORD.isNotEmpty()) {
             Authenticator.setDefault(object : Authenticator(){
                 override fun getPasswordAuthentication(): PasswordAuthentication {
@@ -48,8 +46,10 @@ class StartupConfiguration(val serviceHolder: ServiceHolder) {
                 }
             })
         }
+        System.setProperty("java.net.useSystemProxies", "false");
         ApiContextInitializer.init()
         val botOptions = getProxyOptions()
+        println("Try to connect using proxy $TG_PROXY_HOST:$TG_PROXY_PORT")
         telegramFacade = TelegramFacade(TG_BOT_TOKEN, botOptions, serviceHolder)
 
         val telegramBotsApi = TelegramBotsApi()
@@ -64,4 +64,7 @@ class StartupConfiguration(val serviceHolder: ServiceHolder) {
         botOptions.proxyType = DefaultBotOptions.ProxyType.SOCKS5
         return botOptions
     }
+
+
+
 }

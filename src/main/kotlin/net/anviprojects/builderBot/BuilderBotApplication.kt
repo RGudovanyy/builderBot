@@ -14,6 +14,6 @@ fun main(args: Array<String>) {
 	val appContext = SpringApplication.run(BuilderBotApplication::class.java, *args)
 
 	val startupConfiguration = appContext.getBean("startupConfiguration") as StartupConfiguration
-	startupConfiguration.initConnections()
+	//startupConfiguration.initConnections()
 }
 

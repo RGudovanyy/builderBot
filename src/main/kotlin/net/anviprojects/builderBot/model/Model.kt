@@ -86,4 +86,4 @@ class BotUser(val username : String) : AbstractModel<Long>() {
 }
 
 
-data class Message(val content : String, val sentTime : Long, val sender : String, val chat: MessengerChat)
+data class Message(val content : String, val sentTime : Long, val sender : String)

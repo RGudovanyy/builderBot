@@ -6,8 +6,10 @@ import net.anviprojects.builderBot.model.Teamcity
 import net.anviprojects.builderBot.model.WebLogic
 import net.anviprojects.builderBot.repositories.*
 import net.anviprojects.builderBot.tasks.*
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.lang.StringBuilder
 import kotlin.streams.toList
 
 
@@ -30,8 +32,6 @@ import kotlin.streams.toList
 @Component
 class MessageProcessor {
 
-    @Autowired
-    lateinit var placeholderRepository : PlaceholderRepository
     @Autowired
     lateinit var teamcityRepository: TeamcityRepository
     @Autowired
@@ -137,8 +137,13 @@ class MessageProcessor {
 
 
     fun parseTeamcityMessage(message: String, botUser: BotUser): Teamcity? {
-        val msgArray = message.substringAfter("!add_teamcity ").split(" ")
+        var rawMessage = message.trim().substringAfter("!add_teamcity ")
+        if (rawMessage.contains("href")) {
+            rawMessage = excludeLinkFromMessage(rawMessage)
+        }
+        val msgArray = rawMessage.split(" ")
         if (msgArray.size != 3) {
+            println("Некорректное число аргументов : ${msgArray}")
             return null // TODO возможно стоит заменить на выброс исключения и тогда возвращаемое значение будет null-safety
         }
         // записываем логин и пароль в сущность текущего пользователя
@@ -148,18 +153,35 @@ class MessageProcessor {
         return teamcityRepository.save(Teamcity(msgArray[0]))
     }
 
+    fun excludeLinkFromMessage(rawMessage: String): String {
+        // some_text <a href>some_link</a> some_text -> some_text some_link some_text
+        val stringBuilder  = StringBuilder()
+        stringBuilder.append(rawMessage.substringBefore('<'))
+        stringBuilder.append(StringUtils.substringBetween(rawMessage, ">", "</"))
+        stringBuilder.append(rawMessage.substringAfterLast('>'))
+        return stringBuilder.toString()
+    }
+
     fun parseBuildPlanMessage(message: String, botUser: BotUser): BuildPlan? {
-        val msgArray = message.substringAfter("!add_buildplan ").split(" ")
-        if (msgArray.size < 2) {
+        var rawMessage = message.substringAfter("!add_buildplan ")
+        val teamcityName : String
+        if (rawMessage.contains("href")) {
+            rawMessage = excludeLinkFromMessage(rawMessage)
+        }
+        val msgArray = rawMessage.split(" ")
+        if (msgArray.size < 3) {
+            println("Некорректное число аргументов : ${msgArray}")
             return null
         }
-        val teamcity = teamcityRepository.findByBuildPlans_Name(msgArray[0])
-        if (teamcity == null) return null
+        val teamcity = teamcityRepository.findByTeamcityAddress(msgArray[1])
+        if (teamcity == null) {
+            println("Не найдена запись о сборочном сервере ${msgArray[1]}")
+            return null
+        }
 
         if (msgArray.size == 2) {
             return buildRepository.save(BuildPlan(msgArray[0], teamcity, emptyList()))
         } else {
-            // TODO получать тимсити из БД по имени
             return buildRepository.save(
                     BuildPlan(msgArray[0], teamcity,
                             message.substringAfter(msgArray[1]).split(",").stream().map(String::trim).toList()))
@@ -167,8 +189,14 @@ class MessageProcessor {
     }
 
     fun parseWebLogicMessage(message: String, botUser: BotUser): WebLogic? {
-        val msgArray = message.substringAfter("!add_weblogic ").trim().split(" ")
+        var rawMessage = message.substringAfter("!add_weblogic ").trim()
+        if (rawMessage.contains("href")) {
+            rawMessage = excludeLinkFromMessage(rawMessage)
+        }
+
+        val msgArray = rawMessage.split(" ")
         if (msgArray.size < 3) {
+            println("Некорректное число аргументов : ${msgArray}")
             return null
         } else if (msgArray.size == 3) {
             return weblogicRepository.save(WebLogic(msgArray[0], msgArray[1], msgArray[2], mutableListOf<String>()))

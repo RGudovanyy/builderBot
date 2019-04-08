@@ -1,5 +1,6 @@
 package net.anviprojects.builderBot.services
 
+import com.microsoft.bot.schema.models.ResourceResponse
 import net.anviprojects.builderBot.model.BotUser
 import net.anviprojects.builderBot.model.Message
 import net.anviprojects.builderBot.model.MessengerChat
@@ -17,55 +18,54 @@ class SystemMessageService {
     @Autowired
     lateinit var messageProcessor: MessageProcessor
 
-    fun onMessage(message: Message, botUser: BotUser) {
+    fun onMessage(message: Message, botUser: BotUser) : String {
 
         val rawMessage = message.content
 
         when {
-            messageProcessor.isAddTeamcity(rawMessage) -> addTeamcity(rawMessage, botUser, message.chat)
-            messageProcessor.isAddBuildPlan(rawMessage) -> addBuildPlan(rawMessage, botUser, message.chat)
-            messageProcessor.isAddWebLogic(rawMessage) -> addWebLogic(rawMessage, botUser, message.chat)
+            messageProcessor.isAddTeamcity(rawMessage) -> return addTeamcity(rawMessage, botUser)
+            messageProcessor.isAddBuildPlan(rawMessage) -> return addBuildPlan(rawMessage, botUser)
+            messageProcessor.isAddWebLogic(rawMessage) -> return addWebLogic(rawMessage, botUser)
 
-            messageProcessor.isGetHelp(rawMessage) -> printHelp(message.chat)
-            messageProcessor.isShutdown(rawMessage) -> shutDown(botUser, message.chat)
-            messageProcessor.isStart(rawMessage) -> printStart(message.chat)
+            messageProcessor.isGetHelp(rawMessage) -> return printHelp()
+            messageProcessor.isShutdown(rawMessage) -> return shutDown(botUser)
+            messageProcessor.isStart(rawMessage) -> return printStart()
         }
+        return ""
     }
 
-    private fun printStart(chat: MessengerChat) {
-        chat.sendMessage("Привет!")
+    private fun printStart(): String {
+        return "Привет!"
     }
 
-    private fun addWebLogic(message: String, botUser: BotUser, chat: MessengerChat) {
+    private fun addWebLogic(message: String, botUser: BotUser): String {
         val weblogic = messageProcessor.parseWebLogicMessage(message, botUser)
         if (null == weblogic) {
-            chat.sendMessage("Не удалось добавить или обновить запись о стенде - проверьте передаваемые данные")
-            return
+            return "Не удалось добавить или обновить запись о стенде - проверьте передаваемые данные"
+
         }
-        chat.sendMessage("Добавлена новая запись стенда:\n$weblogic")
+        return "Добавлена новая запись стенда:\n$weblogic"
     }
 
-    private fun addBuildPlan(message: String, botUser: BotUser, chat: MessengerChat) {
+    private fun addBuildPlan(message: String, botUser: BotUser): String {
         val buildPlan = messageProcessor.parseBuildPlanMessage(message, botUser)
         if (null == buildPlan) {
-            chat.sendMessage("Не удалось добавить или обновить запись о билд плане - проверьте передаваемые данные")
-            return
+            return "Не удалось добавить или обновить запись о билд плане - проверьте передаваемые данные"
         }
-        chat.sendMessage("Добавлен новый билд план:\n$buildPlan")
+        return "Добавлен новый билд план:\n$buildPlan"
     }
 
-    private fun addTeamcity(message: String, botUser: BotUser, chat: MessengerChat) {
+    private fun addTeamcity(message: String, botUser: BotUser): String {
         val teamcity = messageProcessor.parseTeamcityMessage(message, botUser)
-        if (null == teamcity) {
-            chat.sendMessage("Не удалось добавить или обновить запись о сборочном сервере - проверьте передаваемые данные")
-            return
+        if (null == teamcity) { //!add_teamcity <a href="http://someteamcityname.otr.ru">http://someteamcityname.otr.ru</a> teamctyuser teamcitypass
+            return "Не удалось добавить или обновить запись о сборочном сервере - проверьте передаваемые данные"
         }
-        chat.sendMessage("Добавлена новая запись о сборочном сервере:\n$teamcity")
+        return "Добавлена новая запись о сборочном сервере:\n$teamcity"
     }
 
-    private fun printHelp(chat: MessengerChat) {
+    private fun printHelp(): String {
 
-        chat.sendMessage("===== Помощь =====\n" +
+        return "===== Помощь =====\n" +
                 "!add_teamcity [teamcity_address] [teamcity_login] [teamcity_password] - добавляет для текущего " +
                 "пользователя новую запись сборочного сервера\n" +
                 "Пример: !add_teamcity http://someteamcityname.otr.ru teamctyuser teamcitypass\n\n" +
@@ -76,15 +76,15 @@ class SystemMessageService {
                 "!add_weblogic [weblogic_address] [alias_1, alias_2 ... alias_N] - добавляет для текущего пользователя новую " +
                 "запись стенда WebLogic, а так же список алиасов которые будут на него ссылаться\n" +
                 "Пример: !add_weblogic http://someweblogicname.otr.ru, стенд, stand, cntyl, ыефтв\n" +
-                "==========")
+                "=========="
     }
 
-    private fun shutDown(botUser: BotUser, chat: MessengerChat) {
+    private fun shutDown(botUser: BotUser): String {
         if (botUser.username in supremeCommanders) {
-            chat.sendMessage("Ну, я пошел")
             System.exit(0)
+            return "Ну, я пошел"
         } else {
-            chat.sendMessage("Ты кто такой? Давай досвидания")
+            return "Ты кто такой? Давай досвидания"
         }
     }
 
